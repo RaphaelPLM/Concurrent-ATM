@@ -4,6 +4,14 @@
 #include <unistd.h>
 #include "transaction.h"
 #include "transaction_producer.h"
+#include "transaction_queue.h"
+
+#define TRUE 1
+#define FALSE 0
+
+extern TransactionQueue *ptr_transaction_buffer;
+
+pthread_mutex_t enqueue_lock = PTHREAD_MUTEX_INITIALIZER;
 
 void initializeTransactionProducers(int producer_quantity)
 {
@@ -32,7 +40,10 @@ void *transactionProducer(void *producer_id)
   {
     Transaction transaction = generateTransactionData();
 
-    printf("%d: %d, %d, %d, %d\n", *(int *)producer_id, transaction.sender_id, transaction.receiver_id, transaction.value, transaction.type);
+    // Enqueuing may imply a race condition when the buffer is almost full.
+    pthread_mutex_lock(&enqueue_lock);
+      enqueue(ptr_transaction_buffer, transaction, TRUE);
+    pthread_mutex_unlock(&enqueue_lock);
 
     sleep(3);
   }
