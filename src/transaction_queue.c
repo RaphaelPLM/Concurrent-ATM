@@ -10,7 +10,7 @@ TransactionQueue *createQueue(unsigned capacity)
   queue->front = 0;
   queue->back = capacity - 1;
   queue->size = 0;
-  queue->transactions = (Transaction *)malloc(sizeof(Transaction) * capacity);
+  queue->transactions = malloc(sizeof(Transaction *) * capacity);
 
   return queue;
 }
@@ -25,14 +25,14 @@ int isTransactionQueueEmpty(TransactionQueue *queue)
   return (queue->size == 0);
 }
 
-void enqueue(TransactionQueue *queue, Transaction transaction, int verbose)
+void enqueue(TransactionQueue *queue, Transaction* transaction, int verbose)
 {
   if (isTransactionQueueFull(queue))
   {
     if(verbose)
-      printf("\nError: The buffer is full.\n");
+      printf("Error: The buffer is full.\n\n");
     
-    return;
+    return; 
   }
 
   queue->back = (queue->back + 1) % queue->capacity;
@@ -41,23 +41,24 @@ void enqueue(TransactionQueue *queue, Transaction transaction, int verbose)
 
   if (verbose)
   {
-    printf("Transaction enqueued: \n");
-    printf("\tSender ID: %d\n", transaction.sender_id);
-    printf("\tReceiver ID: %d\n", transaction.receiver_id);
-    printf("\tValue: %d\n", transaction.value);
-    printf("\tType: %d\n\n", transaction.type);
+    printf("Transaction enqueued: \n\tSender ID: %d\n\tReceiver ID: %d\n\tValue: %d\n\tType: %d\n\nThe queue has now %d transactions.\n\n", transaction->sender_id, transaction->receiver_id, transaction->value, transaction->type, queue->size);
   }
 }
 
-Transaction dequeue(TransactionQueue *queue)
+Transaction* dequeue(TransactionQueue *queue, int verbose)
 {
   if (isTransactionQueueEmpty(queue))
-    return;
+    return generateInvalidTransaction();
 
-  Transaction transaction = queue->transactions[queue->front];
+  Transaction *transaction = queue->transactions[queue->front];
 
   queue->front = (queue->front + 1) % queue->capacity;
   queue->size = queue->size - 1;
 
+  if(verbose)
+    printf("Transaction dequeued: \n\tSender ID: %d\n\tReceiver ID: %d\n\tValue: %d\n\tType: %d\n\nThe queue has now %d transactions.\n\n", transaction->sender_id, transaction->receiver_id, transaction->value, transaction->type, queue->size);
+
   return transaction;
 }
+
+// se der problema, deixa como transaction ao inves de transaction *
