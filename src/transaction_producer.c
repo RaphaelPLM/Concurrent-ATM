@@ -13,9 +13,11 @@ extern TransactionQueue *ptr_transaction_buffer;
 
 pthread_mutex_t enqueue_lock = PTHREAD_MUTEX_INITIALIZER;
 
-void initializeTransactionProducers(int producer_quantity)
+extern pthread_cond_t cond_empty_buffer;
+
+pthread_t *initializeTransactionProducers(int producer_quantity)
 {
-  pthread_t producer_threads[producer_quantity];
+  pthread_t *producer_threads = malloc(sizeof(pthread_t) * producer_quantity);
 
   for (int i = 0; i < producer_quantity; i++)
   {
@@ -26,25 +28,49 @@ void initializeTransactionProducers(int producer_quantity)
 
     if (error)
     {
-      printf("An error occurred while creating thread %d\n", *(int *)producer_id);
+      printf("ERROR: An error occurred while creating thread %d\n\n", *(int *)producer_id);
       exit(1);
     }
   }
 
-  pthread_join(producer_threads[0], NULL);
+  return producer_threads;
 }
 
 void *transactionProducer(void *producer_id)
 {
   while (1)
   {
-    Transaction transaction = generateTransactionData();
+    Transaction *transaction = generateTransactionData();
+
+    if (!validateTransaction(transaction))
+    {
+      printf("ERROR: The produced transaction is invalid.\n\n");
+
+      // Add error treatment here.
+
+      continue;
+    }
 
     // Enqueuing may imply a race condition when the buffer is almost full.
     pthread_mutex_lock(&enqueue_lock);
       enqueue(ptr_transaction_buffer, transaction, TRUE);
+
+      if (ptr_transaction_buffer->size == 1)
+        wakeUpConsumers();
     pthread_mutex_unlock(&enqueue_lock);
 
-    sleep(3);
+    sleep(1);
   }
+}
+
+void joinProducerThreads(pthread_t producer_threads[])
+{
+  pthread_join(producer_threads[0], NULL);
+}
+
+void wakeUpConsumers()
+{
+  pthread_cond_broadcast(&cond_empty_buffer);
+
+  printf("Waking up consumers.\n\n");
 }
