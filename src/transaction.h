@@ -5,7 +5,7 @@ typedef struct
 {
   int sender_id;
   int receiver_id;
-  int value;
+  int value; // TODO: Switch type to double
   int type;
 } Transaction;
 

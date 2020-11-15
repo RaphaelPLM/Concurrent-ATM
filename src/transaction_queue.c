@@ -60,5 +60,3 @@ Transaction* dequeue(TransactionQueue *queue, int verbose)
 
   return transaction;
 }
-
-// se der problema, deixa como transaction ao inves de transaction *

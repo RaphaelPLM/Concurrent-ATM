@@ -60,6 +60,7 @@ int generateTransactionType()
   return rand() % 3 + 1;
 }
 
+// TODO: Validate based on transaction type
 int validateTransaction(Transaction *transaction)
 {
   return (validateSender(transaction->sender_id) && validateReceiver(transaction->receiver_id) && validateDistinctSenderReceiver(transaction->sender_id, transaction->receiver_id) && validateType(transaction->type));
@@ -84,3 +85,4 @@ static int validateType(int type)
 {
   return type > 0 && type <= 3;
 }
+

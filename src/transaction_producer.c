@@ -46,7 +46,7 @@ void *transactionProducer(void *producer_id)
     {
       printf("ERROR: The produced transaction is invalid.\n\n");
 
-      // Add error treatment here.
+      // TODO: Validation error treatment.
 
       continue;
     }
@@ -59,7 +59,7 @@ void *transactionProducer(void *producer_id)
         wakeUpConsumers();
     pthread_mutex_unlock(&enqueue_lock);
 
-    sleep(1);
+    sleep(2);
   }
 }
 
