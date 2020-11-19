@@ -65,7 +65,7 @@ void *transactionConsumer(void *consumer_id)
       
       Transaction *transaction = dequeue(ptr_transaction_buffer, TRUE);
 
-      while (costumerHasTransactionInProgress(transaction->sender_id))
+      while (costumerHasTransactionInProgress(transaction->sender_id) || costumerHasTransactionInProgress(transaction->receiver_id))
       {
         printf("%d: Ongoing transaction by sender %d.\n\n", thread_id, transaction->sender_id);
         
